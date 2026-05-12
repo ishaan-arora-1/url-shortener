@@ -1,5 +1,5 @@
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import func, select, update
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from .config import get_settings
 from .models import URL
@@ -32,3 +32,17 @@ async def create_short_url(db: AsyncSession, original_url: str) -> URL:
     await db.commit()
     await db.refresh(url)
     return url
+
+
+async def register_click(sessionmaker: async_sessionmaker[AsyncSession], code: str) -> None:
+    """Bump the click counter and last-accessed time for a code.
+
+    Runs in its own session as a background task so it never slows the redirect.
+    """
+    async with sessionmaker() as session:
+        await session.execute(
+            update(URL)
+            .where(URL.short_code == code)
+            .values(clicks=URL.clicks + 1, last_accessed_at=func.now())
+        )
+        await session.commit()
