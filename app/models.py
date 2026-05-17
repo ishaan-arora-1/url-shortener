@@ -1,15 +1,18 @@
 from datetime import datetime
 
-from sqlalchemy import BigInteger, DateTime, String, func
+from sqlalchemy import BigInteger, DateTime, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .database import Base
+
+# Postgres uses BIGINT; SQLite (used in tests) only autoincrements its INTEGER rowid.
+BigIntPK = BigInteger().with_variant(Integer, "sqlite")
 
 
 class URL(Base):
     __tablename__ = "urls"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigIntPK, primary_key=True, autoincrement=True)
     # Filled in right after insert once we know the row id (see crud.create_short_url).
     short_code: Mapped[str | None] = mapped_column(String(16), unique=True, index=True)
     original_url: Mapped[str] = mapped_column(String(2048), nullable=False)
