@@ -1,5 +1,6 @@
-from app.config import get_settings
 from httpx import AsyncClient
+
+from app.config import get_settings
 
 
 async def test_shorten_is_rate_limited(client: AsyncClient):

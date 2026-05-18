@@ -15,3 +15,5 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+# FastAPI relies on calling Depends()/Query() in argument defaults.
+ignore = ["B008"]
